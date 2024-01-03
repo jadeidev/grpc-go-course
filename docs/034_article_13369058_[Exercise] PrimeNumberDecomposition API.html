@@ -1,0 +1,24 @@
+<p><em>Now it is your turn to write code!</em></p>
+
+<p>In this exercise, your goal is <strong>to implement a PrimeNumberDecomposition RPC Server Streaming API in a CalculatorService:</strong></p>
+
+<ul><li>The function takes a Request message that has one integer, and returns a stream of Responses that represent the prime number decomposition of that number (see below for the algorithm).</li><li>Remember to first implement the service definition in a .proto file, alongside the RPC messages</li><li>Implement the Server code first</li><li>Test the server code by implementing the Client</li></ul>
+
+<p><em>Example:</em></p>
+
+<p>The client will send one number (120) and the server will respond with a stream of (2,2,2,3,5), because <em>120=2*2*2*3*5 </em></p>
+
+<p><em>Algorithm (pseudo code):</em></p>
+
+<pre class="prettyprint linenums">k = 2
+N = 210
+while N &gt; 1:
+    if N % k == 0:   // if k evenly divides into N
+        print k      // this is a factor
+        N = N / k    // divide N by k so that we have the rest of the number left.
+    else:
+        k = k + 1</pre>
+
+<p><strong></strong></p>
+
+<p><strong>Good luck!</strong></p>

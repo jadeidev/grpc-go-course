@@ -13,12 +13,14 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
-	"github.com/simplesteph/grpc-go-course/greet/greetpb"
+	"github.com/greet/greetpb"
 
 	"google.golang.org/grpc"
 )
 
-type server struct{}
+type server struct {
+	greetpb.UnimplementedGreetServiceServer
+}
 
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
@@ -119,8 +121,8 @@ func main() {
 	opts := []grpc.ServerOption{}
 	tls := false
 	if tls {
-		certFile := "ssl/server.crt"
-		keyFile := "ssl/server.pem"
+		certFile := "../../ssl/server.crt"
+		keyFile := "../../ssl/server.pem"
 		creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
 		if sslErr != nil {
 			log.Fatalf("Failed loading certificates: %v", sslErr)
