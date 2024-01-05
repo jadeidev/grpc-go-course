@@ -18,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/blog/blogpb"
+	"github.com/jadeidev/grpc-go-course/blog/blogpb"
 	"google.golang.org/grpc"
 )
 

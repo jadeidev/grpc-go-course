@@ -1,4 +1,4 @@
-module github.com/calculator
+module github.com/jadeidev/grpc-go-course/calculator
 
 go 1.21.5
 

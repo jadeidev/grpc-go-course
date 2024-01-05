@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/greet/greetpb"
+	"github.com/jadeidev/grpc-go-course/greet/greetpb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"

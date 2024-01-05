@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/blog/blogpb"
+	"github.com/jadeidev/grpc-go-course/blog/blogpb"
 	"google.golang.org/grpc"
 )
 

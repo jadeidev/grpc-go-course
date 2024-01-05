@@ -1,4 +1,4 @@
-module github.com/blog
+module github.com/jadeidev/grpc-go-course/blog
 
 go 1.21.5
 

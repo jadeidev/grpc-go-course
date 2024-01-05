@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/calculator/calculatorpb"
+	"github.com/jadeidev/grpc-go-course/calculator/calculatorpb"
 	"google.golang.org/grpc/reflection"
 
 	"google.golang.org/grpc"

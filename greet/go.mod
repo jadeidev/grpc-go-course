@@ -1,4 +1,4 @@
-module github.com/greet
+module github.com/jadeidev/grpc-go-course/greet
 
 go 1.21.5
 
