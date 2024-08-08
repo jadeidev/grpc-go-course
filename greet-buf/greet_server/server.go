@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
+	"google.golang.org/protobuf/encoding/protojson"
+
 	greetpb "github.com/jadeidev/grpc-go-course/greet-buf/gen/go/greet/v1"
 	"google.golang.org/grpc"
 	//"google.golang.org/grpc/reflection"
@@ -29,6 +31,8 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	res := &greetpb.GreetResponse{
 		Result: result,
 	}
+	jsonReq, _ := protojson.Marshal(req)
+	fmt.Println("Request in Json format: ", string(jsonReq))
 	return res, nil
 }
 
