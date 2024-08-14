@@ -6,5 +6,6 @@ use (
 	./calculator
 	./greet
 	./greet-buf
+	./greet-buf-validate
 	./greet-gateway
 )
