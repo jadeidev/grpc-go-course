@@ -11,6 +11,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
 	"google.golang.org/protobuf/encoding/protojson"
@@ -136,14 +137,8 @@ func (*server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDead
 	return res, nil
 }
 
-func main() {
-	fmt.Println("Hello world")
-
-	lis, err := net.Listen("tcp", "0.0.0.0:50051")
-	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
-	}
-
+func NewServer() (*grpc.Server, err) {
+	// create a server
 	opts := []grpc.ServerOption{}
 	tls := false
 	if tls {
@@ -159,8 +154,19 @@ func main() {
 
 	s := grpc.NewServer(opts...)
 	greetpb.RegisterGreetServiceServer(s, &server{})
-	//reflection.Register(s)
+	reflection.Register(s)
+	return s, nil
+}
 
+func main() {
+	fmt.Println("Hello world")
+
+	lis, err := net.Listen("tcp", "0.0.0.0:50051")
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+	}
+
+	s, err := NewServer()
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

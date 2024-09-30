@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/bufbuild/protovalidate-go"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/test/bufconn"
 
 	greetpb "github.com/jadeidev/grpc-go-course/greet-buf-validate/gen/go/greet/v1"
 )
@@ -33,3 +35,28 @@ func TestValidate(t *testing.T) {
 		fmt.Println("validation succeeded")
 	}
 }
+
+// here we want to test the server implementation
+// first we wanna simulate server
+func setupServer(t *testing.T) (*grpc.Server, *bufconn.Listener) {
+	// create a server
+	lis := bufconn.Listen(1024 * 1024)
+	t.Cleanup(func() {
+		lis.Close()
+	})
+	srv, err := NewServer()
+	if err != nil {
+		t.Fatalf("failed to create server: %v", err)
+	}
+	t.Cleanup(func() {
+		srv.Stop()
+	})
+	go func() {
+		if err := srv.Serve(lis); err != nil {
+			panic(fmt.Sprintf("Server exited with error: %v", err))
+		}
+	}()
+	return srv, lis
+}
+
+// now we wanna simulate client
