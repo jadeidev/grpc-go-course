@@ -15,7 +15,8 @@ import (
 
 	"google.golang.org/protobuf/encoding/protojson"
 
-	greetpb "github.com/jadeidev/grpc-go-course/greet-buf/gen/go/greet/v1"
+	"github.com/bufbuild/protovalidate-go"
+	greetpb "github.com/jadeidev/grpc-go-course/greet-buf-validate/gen/go/greet/v1"
 	"google.golang.org/grpc"
 	//"google.golang.org/grpc/reflection"
 )
@@ -24,8 +25,19 @@ type server struct {
 	greetpb.UnimplementedGreetServiceServer
 }
 
+// see how validate is used in the Greet function
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
+	// validate input
+	v, err := protovalidate.New()
+	if err != nil {
+		fmt.Println("failed to initialize validator:", err)
+	}
+	if err = v.Validate(req); err != nil {
+		fmt.Println("validation failed:", err)
+	} else {
+		fmt.Println("validation succeeded")
+	}
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	res := &greetpb.GreetResponse{
@@ -36,8 +48,18 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	return res, nil
 }
 
+// see how validate is used in the GreetManyTimes function
 func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
 	fmt.Printf("GreetManyTimes function was invoked with %v\n", req)
+	v, err := protovalidate.New()
+	if err != nil {
+		fmt.Println("failed to initialize validator:", err)
+	}
+	if err = v.Validate(req); err != nil {
+		fmt.Println("validation failed:", err)
+	} else {
+		fmt.Println("validation succeeded")
+	}
 	firstName := req.GetGreeting().GetFirstName()
 	for i := 0; i < 10; i++ {
 		result := "Hello " + firstName + " number " + strconv.Itoa(i)

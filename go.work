@@ -1,11 +1,10 @@
-go 1.22.5
+go 1.23.1
 
 use (
 	./blog
 	./calc
 	./calculator
 	./greet
-	./greet-buf
-	./greet-buf-validate
+	./greet-advanced
 	./greet-gateway
 )

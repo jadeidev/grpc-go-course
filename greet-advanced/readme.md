@@ -1,3 +1,4 @@
+# generate proto files
 cd into the greet-buf folder
 `buf generate`
 
