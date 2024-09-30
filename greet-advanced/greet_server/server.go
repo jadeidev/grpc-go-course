@@ -7,10 +7,12 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	grpchealth "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
@@ -22,12 +24,44 @@ import (
 	//"google.golang.org/grpc/reflection"
 )
 
-type server struct {
+type Server struct {
 	greetpb.UnimplementedGreetServiceServer
+	// lets add the standard grpc health check service
+	grpchealth.UnimplementedHealthServer
+	healthMu  sync.RWMutex
+	statusMap map[string]grpchealth.HealthCheckResponse_ServingStatus
+}
+
+func NewServer() (*grpc.Server, error) {
+	// create a server
+	opts := []grpc.ServerOption{}
+	tls := false
+	if tls {
+		certFile := "../../ssl/server.crt"
+		keyFile := "../../ssl/server.pem"
+		creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+		if sslErr != nil {
+			log.Fatalf("Failed loading certificates: %v", sslErr)
+			return nil, sslErr
+		}
+		opts = append(opts, grpc.Creds(creds))
+	}
+
+	s := grpc.NewServer(opts...)
+	server := &Server{
+		statusMap: map[string]grpchealth.HealthCheckResponse_ServingStatus{
+			"":      grpchealth.HealthCheckResponse_SERVING,
+			"greet": grpchealth.HealthCheckResponse_SERVING,
+		},
+	}
+	greetpb.RegisterGreetServiceServer(s, server)
+	grpchealth.RegisterHealthServer(s, server)
+	reflection.Register(s)
+	return s, nil
 }
 
 // see how validate is used in the Greet function
-func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
+func (*Server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
 	// validate input
 	v, err := protovalidate.New()
@@ -36,6 +70,7 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	}
 	if err = v.Validate(req); err != nil {
 		fmt.Println("validation failed:", err)
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	} else {
 		fmt.Println("validation succeeded")
 	}
@@ -44,13 +79,20 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	res := &greetpb.GreetResponse{
 		Result: result,
 	}
-	jsonReq, _ := protojson.Marshal(req)
-	fmt.Println("Request in Json format: ", string(jsonReq))
+	// for proto messages marshal and unmarshal only use protojson
+	marshaler := protojson.MarshalOptions{
+		Multiline:         true,
+		EmitUnpopulated:   true,
+		EmitDefaultValues: true,
+	}
+
+	jsonReq, _ := marshaler.Marshal(req)
+	fmt.Println("Request in Json format: \n", string(jsonReq))
 	return res, nil
 }
 
 // see how validate is used in the GreetManyTimes function
-func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
+func (*Server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
 	fmt.Printf("GreetManyTimes function was invoked with %v\n", req)
 	v, err := protovalidate.New()
 	if err != nil {
@@ -73,7 +115,7 @@ func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb
 	return nil
 }
 
-func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
+func (*Server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 	fmt.Printf("LongGreet function was invoked with a streaming request\n")
 	result := ""
 	for {
@@ -93,7 +135,7 @@ func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 	}
 }
 
-func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) error {
+func (*Server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) error {
 	fmt.Printf("GreetEveryone function was invoked with a streaming request\n")
 
 	for {
@@ -119,7 +161,7 @@ func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) er
 
 }
 
-func (*server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDeadlineRequest) (*greetpb.GreetWithDeadlineResponse, error) {
+func (*Server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDeadlineRequest) (*greetpb.GreetWithDeadlineResponse, error) {
 	fmt.Printf("GreetWithDeadline function was invoked with %v\n", req)
 	for i := 0; i < 3; i++ {
 		if ctx.Err() == context.DeadlineExceeded {
@@ -137,25 +179,36 @@ func (*server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDead
 	return res, nil
 }
 
-func NewServer() (*grpc.Server, error) {
-	// create a server
-	opts := []grpc.ServerOption{}
-	tls := false
-	if tls {
-		certFile := "../../ssl/server.crt"
-		keyFile := "../../ssl/server.pem"
-		creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
-		if sslErr != nil {
-			log.Fatalf("Failed loading certificates: %v", sslErr)
-			return nil, sslErr
+// implement the health check service
+func (s *Server) Check(ctx context.Context, in *grpchealth.HealthCheckRequest) (*grpchealth.HealthCheckResponse, error) {
+	if in.Service == "greet" {
+		// perform basic greet to validate things are working
+		_, err := s.Greet(ctx, &greetpb.GreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Health",
+				LastName:  "Check",
+			},
+		})
+		if err != nil {
+			s.SetServiceStatus(in.Service, grpchealth.HealthCheckResponse_NOT_SERVING)
+		} else {
+			s.SetServiceStatus(in.Service, grpchealth.HealthCheckResponse_SERVING)
 		}
-		opts = append(opts, grpc.Creds(creds))
 	}
+	s.healthMu.RLock()
+	defer s.healthMu.RUnlock()
+	if serviceStatus, ok := s.statusMap[in.Service]; ok {
+		return &grpchealth.HealthCheckResponse{
+			Status: serviceStatus,
+		}, nil
+	}
+	return nil, status.Error(codes.NotFound, "unknown service")
+}
 
-	s := grpc.NewServer(opts...)
-	greetpb.RegisterGreetServiceServer(s, &server{})
-	reflection.Register(s)
-	return s, nil
+func (s *Server) SetServiceStatus(service string, status grpchealth.HealthCheckResponse_ServingStatus) {
+	s.healthMu.Lock()
+	defer s.healthMu.Unlock()
+	s.statusMap[service] = status
 }
 
 func main() {
