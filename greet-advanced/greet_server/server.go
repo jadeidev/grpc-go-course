@@ -26,7 +26,7 @@ import (
 
 type Server struct {
 	greetpb.UnimplementedGreetServiceServer
-	// lets add the standard grpc health check service
+	// lets add the standard grpc health check service, the proto file for this is all on the grpc side
 	grpchealth.UnimplementedHealthServer
 	healthMu  sync.RWMutex
 	statusMap map[string]grpchealth.HealthCheckResponse_ServingStatus
@@ -55,6 +55,7 @@ func NewServer() (*grpc.Server, error) {
 		},
 	}
 	greetpb.RegisterGreetServiceServer(s, server)
+	// just like the greet service, we need to register the health service
 	grpchealth.RegisterHealthServer(s, server)
 	reflection.Register(s)
 	return s, nil
