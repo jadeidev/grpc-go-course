@@ -137,7 +137,7 @@ func (*server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDead
 	return res, nil
 }
 
-func NewServer() (*grpc.Server, err) {
+func NewServer() (*grpc.Server, error) {
 	// create a server
 	opts := []grpc.ServerOption{}
 	tls := false
@@ -147,7 +147,7 @@ func NewServer() (*grpc.Server, err) {
 		creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
 		if sslErr != nil {
 			log.Fatalf("Failed loading certificates: %v", sslErr)
-			return
+			return nil, sslErr
 		}
 		opts = append(opts, grpc.Creds(creds))
 	}
@@ -167,6 +167,9 @@ func main() {
 	}
 
 	s, err := NewServer()
+	if err != nil {
+		log.Fatalf("failed to create server: %v", err)
+	}
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

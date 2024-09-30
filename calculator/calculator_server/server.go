@@ -17,7 +17,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-type server struct{}
+type server struct {
+	calculatorpb.UnimplementedCalculatorServiceServer
+}
 
 func (*server) Sum(ctx context.Context, req *calculatorpb.SumRequest) (*calculatorpb.SumResponse, error) {
 	fmt.Printf("Received Sum RPC: %v\n", req)

@@ -36,7 +36,9 @@ func TestValidate(t *testing.T) {
 	}
 }
 
-// here we want to test the server implementation
+// here we want to test the server implementation using golang test suite
+// (rather than using the client we created greet_client/client.go)
+
 // first we wanna simulate server
 func setupServer(t *testing.T) (*grpc.Server, *bufconn.Listener) {
 	// create a server
