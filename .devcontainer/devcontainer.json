@@ -1,44 +1,57 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/go
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
-	"name": "Go",
+	"name": "golang",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/go:1-1.22-bookworm",
-	"features": {
-		"ghcr.io/devcontainers-contrib/features/protoc:1": {}
- },
- "customizations": {
-  "vscode": {
-   "extensions": [
-    "bufbuild.vscode-buf",
-    "golang.go",
-    "eamodio.gitlens",
-    "mrmlnc.vscode-duplicate",
-    "ms-toolsai.jupyter",
-    "Gruntfuggly.todo-tree",
-    "ephoton.indent-switcher",
-    "wmaurer.change-case",
-    "mhutchie.git-graph",
-    "charliermarsh.ruff",
-    "oderwat.indent-rainbow",
-    "ms-python.python",
-    "GitHub.copilot"
-   ]
-  }
- },
-
+	"image": "mcr.microsoft.com/devcontainers/go:1-1.23-bookworm",
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
+	"features": {
+		"ghcr.io/devcontainers-contrib/features/zsh-plugins:0": {},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1":{
+            "version": "latest",
+            "helm": "latest",
+            "minikube": "none"
+        },
+		"ghcr.io/devcontainers-contrib/features/kubectx-kubens:1": {},
+		"ghcr.io/dhoeric/features/k9s:1": {},
+		"ghcr.io/marcozac/devcontainer-features/buf:1": {},
+		"ghcr.io/devcontainers-contrib/features/protoc:1": {},
+		"ghcr.io/devcontainers-contrib/features/grpcurl-asdf:2":{}
+	},
+	"mounts": [
+        // "source=${localEnv:HOME}${localEnv:USERPROFILE}/.kube/config,target=/home/vscode/.kube/config,type=bind"
+    ],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "BIN=/usr/local/bin && LATEST_VERSION=$(curl -s https://api.github.com/repos/bufbuild/buf/releases/latest | grep 'tag_name' | cut -d '\"' -f 4) && sudo curl -sSL \"https://github.com/bufbuild/buf/releases/download/${LATEST_VERSION}/buf-$(uname -s)-$(uname -m)\" -o \"${BIN}/buf\" && sudo chmod +x \"${BIN}/buf\""
-
+	// "postCreateCommand": "sudo chmod -R a+rw /home/vscode/.kube",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+		
+				"rogalmic.bash-debug",
+				"mads-hartmann.bash-ide-vscode",
+				"wmaurer.change-case",
+				"mrmlnc.vscode-duplicate",
+				"tamasfe.even-better-toml",
+				"dakara.dakara-foldplus",
+				"mhutchie.git-graph",
+				"eamodio.gitlens",
+				"oderwat.indent-rainbow",
+				"ephoton.indent-switcher",
+				"Gruntfuggly.todo-tree",
+				"redhat.vscode-yaml",
+				"bufbuild.vscode-buf"
+			]
+		}
+	},
+	
+	"containerEnv": {
+		
+	}
 	// Configure tool-specific properties.
 	// "customizations": {},
-
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }
