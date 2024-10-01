@@ -21,7 +21,7 @@ import (
 	"github.com/bufbuild/protovalidate-go"
 	greetpb "github.com/jadeidev/grpc-go-course/greet-buf-validate/gen/go/greet/v1"
 	"google.golang.org/grpc"
-	//"google.golang.org/grpc/reflection"
+	
 )
 
 type Server struct {
