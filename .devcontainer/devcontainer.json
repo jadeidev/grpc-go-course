@@ -15,7 +15,7 @@
         },
 		"ghcr.io/devcontainers-contrib/features/kubectx-kubens:1": {},
 		"ghcr.io/dhoeric/features/k9s:1": {},
-		"ghcr.io/marcozac/devcontainer-features/buf:1": {},
+		"ghcr.io/marcozac/devcontainer-features/buf:1": {}, // doesnt work in macos
 		"ghcr.io/devcontainers-contrib/features/protoc:1": {},
 		"ghcr.io/devcontainers-contrib/features/grpcurl-asdf:2":{}
 	},
@@ -26,6 +26,7 @@
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "sudo chmod -R a+rw /home/vscode/.kube",
+	"postCreateCommand": "BIN=/usr/local/bin && LATEST_VERSION=$(curl -s https://api.github.com/repos/bufbuild/buf/releases/latest | jq -r '.tag_name') && sudo curl -sSL \"https://github.com/bufbuild/buf/releases/download/${LATEST_VERSION}/buf-$(uname -s)-$(uname -m)\" -o \"${BIN}/buf\" && sudo chmod +x \"${BIN}/buf\"",
 	"customizations": {
 		"vscode": {
 			"extensions": [
