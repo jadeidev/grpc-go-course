@@ -26,11 +26,10 @@
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "sudo chmod -R a+rw /home/vscode/.kube",
-	"postCreateCommand": "BIN=/usr/local/bin && LATEST_VERSION=$(curl -s https://api.github.com/repos/bufbuild/buf/releases/latest | jq -r '.tag_name') && sudo curl -sSL \"https://github.com/bufbuild/buf/releases/download/${LATEST_VERSION}/buf-$(uname -s)-$(uname -m)\" -o \"${BIN}/buf\" && sudo chmod +x \"${BIN}/buf\"",
+	"postCreateCommand": "BIN=/usr/local/bin && LATEST_VERSION=$(curl -s https://api.github.com/repos/bufbuild/buf/releases/latest | jq -r '.tag_name') && sudo curl -sSL \"https://github.com/bufbuild/buf/releases/download/${LATEST_VERSION}/buf-$(uname -s)-$(uname -m)\" -o \"${BIN}/buf\" && sudo chmod +x \"${BIN}/buf\" && git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting && git clone https://github.com/marlonrichert/zsh-autocomplete ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autocomplete && sed -i 's/^plugins=(.*)$/plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-autocomplete)/' ~/.zshrc",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-		
 				"rogalmic.bash-debug",
 				"mads-hartmann.bash-ide-vscode",
 				"wmaurer.change-case",
@@ -44,12 +43,16 @@
 				"Gruntfuggly.todo-tree",
 				"redhat.vscode-yaml",
 				"bufbuild.vscode-buf"
-			]
+			],
+			"settings": {
+                		"terminal.integrated.defaultProfile.linux": "zsh"
+			}
 		}
 	},
 	
 	"containerEnv": {
-		
+		"REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
+		"NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
 	}
 	// Configure tool-specific properties.
 	// "customizations": {},
