@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -19,7 +20,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/bufbuild/protovalidate-go"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	greetpb "github.com/jadeidev/grpc-go-course/greet-buf-validate/gen/go/greet/v1"
+	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 )
 
@@ -32,6 +35,11 @@ type Server struct {
 }
 
 func NewServer() (*grpc.Server, error) {
+	logger := zerolog.New(os.Stderr)
+	logOpts := []logging.Option{
+		logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
+		// Add any other option (check functions starting with logging.With).
+	}
 	// create a server
 	opts := []grpc.ServerOption{}
 	tls := false
@@ -47,6 +55,7 @@ func NewServer() (*grpc.Server, error) {
 	}
 	itercaptors := []grpc.UnaryServerInterceptor{
 		contextInterceptor(),
+		logging.UnaryServerInterceptor(InterceptorLogger(logger), logOpts...),
 	}
 
 	s := grpc.NewServer(grpc.ChainUnaryInterceptor(itercaptors...))

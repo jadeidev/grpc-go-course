@@ -3,7 +3,7 @@ cd into the greet-buf folder
 `buf generate`
 
 to start server:
-`go run greet_server/server.go`
+`go run $(find greet_server -name '*.go' ! -name '*_test.go')`
 
 to start client:
 `go run greet_client/client.go`
