@@ -21,6 +21,7 @@
 	},
 	"mounts": [
         // "source=${localEnv:HOME}${localEnv:USERPROFILE}/.kube/config,target=/home/vscode/.kube/config,type=bind"
+		"source=${localEnv:HOME}/.ssh/id_ed25519,target=/home/vscode/.ssh/id_ed25519,type=bind,consistency=cached"
     ],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
@@ -45,14 +46,15 @@
 				"bufbuild.vscode-buf"
 			],
 			"settings": {
-                		"terminal.integrated.defaultProfile.linux": "zsh"
+				"terminal.integrated.defaultProfile.linux": "zsh"
 			}
 		}
 	},
 	
 	"containerEnv": {
 		"REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
-		"NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
+		"NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt",
+		"SSH_AUTH_SOCK": "/ssh-agent"
 	}
 	// Configure tool-specific properties.
 	// "customizations": {},

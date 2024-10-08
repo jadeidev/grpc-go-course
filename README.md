@@ -6,7 +6,8 @@ This is a companion repository for my [GRPC Golang course](http://bit.ly/grpc-go
 
 # Content
 
-- Greeting Service
+- Greeting Service - basic setup
+- Greet service advanced - with advanced functionalities
 - Calculator Service
 - Unary, Server Streaming, Client Streaming, BiDi Streaming
 - Error Handling, Deadlines, SSL Encryption

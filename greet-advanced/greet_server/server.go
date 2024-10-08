@@ -21,7 +21,6 @@ import (
 	"github.com/bufbuild/protovalidate-go"
 	greetpb "github.com/jadeidev/grpc-go-course/greet-buf-validate/gen/go/greet/v1"
 	"google.golang.org/grpc"
-	
 )
 
 type Server struct {
@@ -46,8 +45,11 @@ func NewServer() (*grpc.Server, error) {
 		}
 		opts = append(opts, grpc.Creds(creds))
 	}
+	itercaptors := []grpc.UnaryServerInterceptor{
+		contextInterceptor(),
+	}
 
-	s := grpc.NewServer(opts...)
+	s := grpc.NewServer(grpc.ChainUnaryInterceptor(itercaptors...))
 	server := &Server{
 		statusMap: map[string]grpchealth.HealthCheckResponse_ServingStatus{
 			"":      grpchealth.HealthCheckResponse_SERVING,
@@ -64,6 +66,7 @@ func NewServer() (*grpc.Server, error) {
 // see how validate is used in the Greet function
 func (*Server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
+	fmt.Printf("Interceptor value: %v\n", ctx.Value(myContextKey).(string))
 	// validate input
 	v, err := protovalidate.New()
 	if err != nil {
