@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"sync"
 	"time"
@@ -21,10 +21,11 @@ import (
 
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	protovalidate_mw "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	greetpb "github.com/jadeidev/grpc-go-course/greet-buf-validate/gen/go/greet/v1"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 )
 
@@ -50,7 +51,7 @@ func NewServer() (*grpc.Server, error) {
 		keyFile := "../../ssl/server.pem"
 		creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
 		if sslErr != nil {
-			log.Fatalf("Failed loading certificates: %v", sslErr)
+			logger.Fatal().Msgf("Failed loading certificates: %v", sslErr)
 			return nil, sslErr
 		}
 		opts = append(opts, grpc.Creds(creds))
@@ -64,7 +65,7 @@ func NewServer() (*grpc.Server, error) {
 	validator, err := protovalidate.New()
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to initialize proto validator")
-		return nil, nil, err
+		return nil, err
 	}
 	interceptors := []grpc.UnaryServerInterceptor{
 		recovery.UnaryServerInterceptor(recoveryOpts...),
@@ -73,7 +74,7 @@ func NewServer() (*grpc.Server, error) {
 		logging.UnaryServerInterceptor(InterceptorLogger(logger), logOpts...),
 	}
 
-	s := grpc.NewServer(grpc.ChainUnaryInterceptor(itercaptors...))
+	s := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptors...))
 	server := &Server{
 		statusMap: map[string]grpchealth.HealthCheckResponse_ServingStatus{
 			"":      grpchealth.HealthCheckResponse_SERVING,
@@ -155,7 +156,7 @@ func (*Server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 			})
 		}
 		if err != nil {
-			log.Fatalf("Error while reading client stream: %v", err)
+			log.Fatal().Msgf("Error while reading client stream: %v", err)
 		}
 
 		firstName := req.GetGreeting().GetFirstName()
@@ -172,7 +173,7 @@ func (*Server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) er
 			return nil
 		}
 		if err != nil {
-			log.Fatalf("Error while reading client stream: %v", err)
+			log.Fatal().Msgf("Error while reading client stream: %v", err)
 			return err
 		}
 		firstName := req.GetGreeting().GetFirstName()
@@ -182,7 +183,7 @@ func (*Server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) er
 			Result: result,
 		})
 		if sendErr != nil {
-			log.Fatalf("Error while sending data to client: %v", sendErr)
+			log.Fatal().Msgf("Error while sending data to client: %v", sendErr)
 			return sendErr
 		}
 	}
@@ -244,14 +245,14 @@ func main() {
 
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		log.Fatal().Msgf("Failed to listen: %v", err)
 	}
 
 	s, err := NewServer()
 	if err != nil {
-		log.Fatalf("failed to create server: %v", err)
+		log.Fatal().Msgf("failed to create server: %v", err)
 	}
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatal().Msgf("failed to serve: %v", err)
 	}
 }
