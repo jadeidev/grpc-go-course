@@ -21,6 +21,8 @@ import (
 
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	protovalidate_mw "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
 	greetpb "github.com/jadeidev/grpc-go-course/greet-buf-validate/gen/go/greet/v1"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
@@ -53,7 +55,20 @@ func NewServer() (*grpc.Server, error) {
 		}
 		opts = append(opts, grpc.Creds(creds))
 	}
-	itercaptors := []grpc.UnaryServerInterceptor{
+	recoveryOpts := []recovery.Option{
+		recovery.WithRecoveryHandler(func(p any) (err error) {
+			log.Error().Msgf("panic triggered: %v, %v", p, string(debug.Stack()))
+			return status.Errorf(codes.Unknown, "panic triggered: %v", p)
+		}),
+	}
+	validator, err := protovalidate.New()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to initialize proto validator")
+		return nil, nil, err
+	}
+	interceptors := []grpc.UnaryServerInterceptor{
+		recovery.UnaryServerInterceptor(recoveryOpts...),
+		protovalidate_mw.UnaryServerInterceptor(validator),
 		contextInterceptor(),
 		logging.UnaryServerInterceptor(InterceptorLogger(logger), logOpts...),
 	}
@@ -76,17 +91,17 @@ func NewServer() (*grpc.Server, error) {
 func (*Server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
 	fmt.Printf("Interceptor value: %v\n", ctx.Value(myContextKey).(string))
-	// validate input
-	v, err := protovalidate.New()
-	if err != nil {
-		fmt.Println("failed to initialize validator:", err)
-	}
-	if err = v.Validate(req); err != nil {
-		fmt.Println("validation failed:", err)
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	} else {
-		fmt.Println("validation succeeded")
-	}
+	// validate input this part isnt needed since we are uing the validation interceptor
+	// v, err := protovalidate.New()
+	// if err != nil {
+	// 	fmt.Println("failed to initialize validator:", err)
+	// }
+	// if err = v.Validate(req); err != nil {
+	// 	fmt.Println("validation failed:", err)
+	// 	return nil, status.Error(codes.InvalidArgument, err.Error())
+	// } else {
+	// 	fmt.Println("validation succeeded")
+	// }
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	res := &greetpb.GreetResponse{
