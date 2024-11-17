@@ -25,5 +25,9 @@ plugins:
       - generate_unbound_methods=true
   - remote: buf.build/grpc-ecosystem/openapiv2
     out: gen/openapiv2
+  # the below plugin is used to generate OAPIV3 spec
+  # requires go install github.com/sudorandom/protoc-gen-connect-openapi@main
+  # - local: protoc-gen-connect-openapi
+  #   out: gen/openapiv31
 inputs:
   - directory: proto

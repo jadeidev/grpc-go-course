@@ -4,6 +4,8 @@
     "title": "greet/v1/greet.proto",
     "version": "version not set"
   },
+  "host": "localhost:8081",
+  "schemes": ["http"],
   "tags": [
     {
       "name": "GreetService"
