@@ -1,6 +1,6 @@
 /*
    This proto was created to demonstrate how to import packages from another directory
-   when running buf generate for this we need to make sure we use managed in buf.gen.yaml to assure package names are correctly importted
+   when running buf generate for this we need to make sure we use managed in buf.gen.yaml to assure package names are correctly imported
    ```buf.gen.yaml
    managed:
      enabled: true
