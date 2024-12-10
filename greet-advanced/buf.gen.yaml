@@ -1,4 +1,14 @@
 version: v2
+managed:
+  enabled: true
+  disable:
+    # Don't modify any file option or field option for googleapis
+    - module: buf.build/googleapis/googleapis
+    - module: buf.build/bufbuild/protovalidate
+  override:
+    # Use this prefix by default for all files
+    - file_option: go_package_prefix
+      value: github.com/jadeidev/grpc-go-course/greet-advanced/gen/go
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: gen/go

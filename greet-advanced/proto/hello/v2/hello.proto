@@ -1,0 +1,38 @@
+/*
+   This proto was created to demonstrate how to import packages from another directory
+   when running buf generate for this we need to make sure we use managed in buf.gen.yaml to assure package names are correctly importted
+   ```buf.gen.yaml
+   managed:
+     enabled: true
+     disable:
+       # Don't modify any file option or field option for googleapis
+       - module: buf.build/googleapis/googleapis
+       - module: buf.build/bufbuild/protovalidate
+     override:
+       # Use this prefix by default for all files
+       - file_option: go_package_prefix
+         value: github.com/jadeidev/grpc-go-course/greet-advanced/gen/go
+   ```
+   will result in the following go package
+   ```hello.pb.go
+   package hellov2
+
+   import (
+     v1 "github.com/jadeidev/grpc-go-course/greet-advanced/gen/go/greet/v1"
+     ...
+   )
+   ```
+
+*/
+syntax = "proto3";
+
+package hello.v2;
+
+import "greet/v1/greet.proto";
+
+option go_package = "gen/go/hello/v2";
+
+service HelloService {
+  // Unary
+  rpc Greet(greet.v1.GreetRequest) returns (greet.v1.GreetResponse) {}
+}
