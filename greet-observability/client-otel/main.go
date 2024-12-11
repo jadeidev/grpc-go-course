@@ -15,7 +15,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
 	"google.golang.org/grpc/credentials/insecure"
 
-	greetpb "otel-poc/gen/greet/v1"
+	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
 
 	"google.golang.org/grpc"
 )

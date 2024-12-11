@@ -10,7 +10,7 @@ import (
 	"go.elastic.co/apm/v2"
 	"go.elastic.co/apm/v2/transport"
 
-	greetpb "otel-poc/gen/greet/v1"
+	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

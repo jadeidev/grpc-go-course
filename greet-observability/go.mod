@@ -1,6 +1,6 @@
-module otel-poc
+module github.com/jadeidev/grpc-go-course/greet-observability
 
-go 1.23.2
+go 1.23.1
 
 require (
 	go.elastic.co/apm/module/apmgrpc/v2 v2.6.2

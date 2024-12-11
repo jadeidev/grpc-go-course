@@ -7,4 +7,5 @@ use (
 	./greet
 	./greet-advanced
 	./greet-gateway
+	./greet-observability
 )

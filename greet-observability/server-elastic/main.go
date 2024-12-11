@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/url"
 
-	greetpb "otel-poc/gen/greet/v1"
+	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
 
 	apmgrpc "go.elastic.co/apm/module/apmgrpc/v2"
 	"go.elastic.co/apm/v2"

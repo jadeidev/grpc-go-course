@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	greetpb "otel-poc/gen/greet/v1"
+	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"

@@ -9,7 +9,7 @@ managed: # see hello.proto for more details
   override:
     # Use this prefix by default for all files
     - file_option: go_package_prefix
-      value: otel-poc
+      value: github.com/jadeidev/grpc-go-course/greet-observability
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: gen
