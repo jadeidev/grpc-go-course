@@ -11,11 +11,13 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 )
 
@@ -25,6 +27,13 @@ type server struct {
 
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
+	// Add span attributes for better visualization
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("rpc.service", "Greeter"),
+		attribute.String("rpc.method", "SayHello"),
+		attribute.String("rpc.system", "grpc"),
+	)
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	res := &greetpb.GreetResponse{
@@ -44,10 +53,13 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 
 	resource := resource.NewWithAttributes(
 		semconv.SchemaURL,
-		semconv.ServiceNameKey.String("imconsole-grpc-greeter-server-otel"),
+		semconv.ServiceName("imconsole-grpc-greeter-server-otel"),
+		semconv.DeploymentEnvironmentName("development"),
+		semconv.ServiceVersion("1.0.0"),
 	)
 
 	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(resource),
 	)

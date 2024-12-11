@@ -8,11 +8,13 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials/insecure"
 
 	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
@@ -32,7 +34,9 @@ func InitTracer() (*sdktrace.TracerProvider, error) {
 
 	resource := resource.NewWithAttributes(
 		semconv.SchemaURL,
-		semconv.ServiceNameKey.String("imconsole-grpc-greeter-client-otel"),
+		semconv.ServiceName("imconsole-grpc-greeter-client-otel"),
+		semconv.DeploymentEnvironmentName("development"),
+		semconv.ServiceVersion("1.0.0"),
 	)
 
 	tp := sdktrace.NewTracerProvider(
@@ -77,13 +81,21 @@ func main() {
 
 func doUnary(c greetpb.GreetServiceClient) {
 	fmt.Println("Starting to do a Unary RPC...")
+	tracer := otel.Tracer("grpc-client")
+	ctx, span := tracer.Start(context.Background(), "ClientCall",
+		trace.WithAttributes(
+			attribute.String("rpc.service", "Greeter"),
+			attribute.String("rpc.system", "grpc"),
+		),
+	)
+	defer span.End()
 	req := &greetpb.GreetRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "Stephane",
 			LastName:  "Maarek",
 		},
 	}
-	res, err := c.Greet(context.Background(), req)
+	res, err := c.Greet(ctx, req)
 	if err != nil {
 		log.Fatalf("error while calling Greet RPC: %v", err)
 	}
