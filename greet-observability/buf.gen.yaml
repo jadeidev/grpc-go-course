@@ -1,0 +1,22 @@
+version: v2
+clean: true
+managed: # see hello.proto for more details
+  enabled: true
+  disable:
+    # Don't modify any file option or field option for googleapis
+    - module: buf.build/googleapis/googleapis
+    - module: buf.build/bufbuild/protovalidate
+  override:
+    # Use this prefix by default for all files
+    - file_option: go_package_prefix
+      value: otel-poc
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: gen
+    opt: paths=source_relative
+  # Use the latest version of protoc-gen-go-grpc
+  - remote: buf.build/grpc/go
+    out: gen
+    opt: paths=source_relative
+inputs:
+  - directory: proto
