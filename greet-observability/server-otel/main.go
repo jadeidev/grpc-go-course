@@ -27,7 +27,7 @@ type server struct {
 
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
-	// Add span attributes for better visualization
+	// Add span attributes for better visualization (not mandatory)
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
 		attribute.String("rpc.service", "Greeter"),

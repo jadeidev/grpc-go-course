@@ -81,13 +81,9 @@ func main() {
 
 func doUnary(c greetpb.GreetServiceClient) {
 	fmt.Println("Starting to do a Unary RPC...")
+	// creating span here is critical to assure that elastic service map will work in the same way it does with 
 	tracer := otel.Tracer("grpc-client")
-	ctx, span := tracer.Start(context.Background(), "ClientCall",
-		trace.WithAttributes(
-			attribute.String("rpc.service", "Greeter"),
-			attribute.String("rpc.system", "grpc"),
-		),
-	)
+	ctx, span := tracer.Start(context.Background(), "ClientCall")
 	defer span.End()
 	req := &greetpb.GreetRequest{
 		Greeting: &greetpb.Greeting{
