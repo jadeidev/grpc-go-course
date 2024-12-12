@@ -9,6 +9,7 @@ import (
 	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -40,6 +41,28 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 		),
 	)
 	defer span.End()
+	// Create an HTTP client with OpenTelemetry instrumentation to make 
+	client := http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+
+	// Make the HTTP request
+	httpReq, _ := http.NewRequestWithContext(ctx, "GET", "https://jsonplaceholder.typicode.com/posts/1", nil)
+	httpResp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Log the response body
+	fmt.Printf("Response from API: %s\n", body)
+	
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	res := &greetpb.GreetResponse{
