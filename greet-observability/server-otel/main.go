@@ -28,12 +28,18 @@ type server struct {
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
 	// Add span attributes for better visualization (not mandatory)
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("rpc.service", "Greeter"),
-		attribute.String("rpc.method", "SayHello"),
-		attribute.String("rpc.system", "grpc"),
+	tracer := otel.Tracer("")
+	_, span := tracer.Start(
+		ctx,
+		"greet.v1.GreetService",
+		trace.WithSpanKind(trace.SpanKindServer),
+		trace.WithAttributes(
+			attribute.String("rpc.system", "grpc"),
+			attribute.String("server.address", "localhost"),
+			attribute.String("server.port", "50051"),
+		),
 	)
+	defer span.End()
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	res := &greetpb.GreetResponse{

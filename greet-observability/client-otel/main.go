@@ -70,6 +70,35 @@ func InitTracer() (*sdktrace.TracerProvider, error) {
 	return tp, nil
 }
 
+func doUnary(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting to do a Unary RPC...")
+	// creating span here is critical to assure that elastic service map will work in the same way it does with 
+	tracer := otel.Tracer("")
+	ctx, span := tracer.Start(
+		context.Background(),
+		"greet.v1.GreetService",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("rpc.system", "grpc"),
+			attribute.String("server.address", "localhost"),
+			attribute.String("server.port", "50051"),
+		),
+	)
+	defer span.End()
+	req := &greetpb.GreetRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "Stephane",
+			LastName:  "Maarek",
+		},
+	}
+	res, err := c.Greet(ctx, req)
+	if err != nil {
+		log.Fatalf("error while calling Greet RPC: %v", err)
+	}
+	log.Printf("Response from Greet: %v", res.Result)
+}
+
+
 func main() {
 	tp, err := InitTracer()
 	if err != nil {
@@ -97,21 +126,3 @@ func main() {
 
 }
 
-func doUnary(c greetpb.GreetServiceClient) {
-	fmt.Println("Starting to do a Unary RPC...")
-	// creating span here is critical to assure that elastic service map will work in the same way it does with 
-	tracer := otel.Tracer("grpc-client")
-	ctx, span := tracer.Start(context.Background(), "ClientCall")
-	defer span.End()
-	req := &greetpb.GreetRequest{
-		Greeting: &greetpb.Greeting{
-			FirstName: "Stephane",
-			LastName:  "Maarek",
-		},
-	}
-	res, err := c.Greet(ctx, req)
-	if err != nil {
-		log.Fatalf("error while calling Greet RPC: %v", err)
-	}
-	log.Printf("Response from Greet: %v", res.Result)
-}
