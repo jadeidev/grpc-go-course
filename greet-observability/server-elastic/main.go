@@ -22,6 +22,34 @@ type server struct {
 
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
+	// demo additional downstream api request when this rpc is called
+	tx := apm.TransactionFromContext(ctx)
+	if tx == nil {
+		tx = apm.DefaultTracer().StartTransaction("HTTP GET", "request")
+	}
+	defer tx.End()
+
+	span := tx.StartSpan("GET https://jsonplaceholder.typicode.com/posts/1", "external.http", nil)
+	defer span.End()
+	ctx = apm.ContextWithSpan(ctx, span)
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", "https://jsonplaceholder.typicode.com/posts/1", nil)
+	if err != nil {
+		return nil, err
+	}
+	client := apmhttp.WrapClient(http.DefaultClient)
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Response from external API: %s\n", body)
+
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	res := &greetpb.GreetResponse{
