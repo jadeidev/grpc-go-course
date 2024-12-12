@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 
 	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
 
@@ -17,7 +19,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 )
@@ -41,7 +42,7 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 		),
 	)
 	defer span.End()
-	// Create an HTTP client with OpenTelemetry instrumentation to make 
+	// Create an HTTP client with OpenTelemetry instrumentation to make
 	client := http.Client{
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
@@ -62,7 +63,7 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 
 	// Log the response body
 	fmt.Printf("Response from API: %s\n", body)
-	
+
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	res := &greetpb.GreetResponse{
@@ -77,14 +78,13 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 		otlptracegrpc.WithEndpointURL("https://localhost:8200"),
 	)
 	// can also use use the http exporter, one use case would be to export to http istead of https (grpc requires https)
-	// for this import "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp" 
+	// for this import "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	// exporter, err := otlptracehttp.New(
 	// 	context.Background(),
 	// 	otlptracehttp.WithEndpointURL("http://localhost:8200"),
 	if err != nil {
 		return nil, err
 	}
-
 
 	resource, err := resource.New(
 		context.Background(),
@@ -105,7 +105,6 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 	// 	semconv.DeploymentEnvironmentName("development"),
 	// 	semconv.ServiceVersion("1.0.0"),
 	// )
-
 
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
