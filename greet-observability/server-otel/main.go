@@ -57,12 +57,26 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 	}
 
 
-	resource := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.ServiceName("imconsole-grpc-greeter-server-otel"),
-		semconv.DeploymentEnvironmentName("development"),
-		semconv.ServiceVersion("1.0.0"),
+	resource, err := resource.New(
+		context.Background(),
+		resource.WithTelemetrySDK(), // Discover and provide information about the OpenTelemetry SDK used.
+		resource.WithProcess(),      // Discover and provide process information.
+		resource.WithOS(),           // Discover and provide OS information.
+		resource.WithContainer(),    // Discover and provide container information.
+		resource.WithHost(),         // Discover and provide host information.
+		resource.WithAttributes(attribute.String("service.name", "grpc-greeter-server-otel")), // Add custom resource attributes.
 	)
+	if err != nil {
+		log.Fatalln(err) // The error may be fatal.
+	}
+	// can also do this manually
+	// resource := resource.NewWithAttributes(
+	// 	semconv.SchemaURL,
+	// 	semconv.ServiceName("grpc-greeter-server-otel"),
+	// 	semconv.DeploymentEnvironmentName("development"),
+	// 	semconv.ServiceVersion("1.0.0"),
+	// )
+
 
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
