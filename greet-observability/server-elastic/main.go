@@ -3,13 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 	"net/url"
 
 	greetpb "github.com/jadeidev/grpc-go-course/greet-observability/gen/greet/v1"
 
 	apmgrpc "go.elastic.co/apm/module/apmgrpc/v2"
+	"go.elastic.co/apm/module/apmhttp/v2"
 	"go.elastic.co/apm/v2"
 	"go.elastic.co/apm/v2/transport"
 
