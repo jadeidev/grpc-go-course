@@ -30,7 +30,7 @@ func SetupAPM() (*apm.Tracer, error) {
 	}
 
 	tracer, err := apm.NewTracerOptions(apm.TracerOptions{
-		ServiceName: "imconsole-grpc-greeter-client-elastic",
+		ServiceName: "grpc-greeter-client-elastic",
 		Transport:   transport,
 	})
 	if err != nil {

@@ -13,7 +13,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -28,22 +27,21 @@ func InitTracer() (*sdktrace.TracerProvider, error) {
 		otlptracegrpc.WithEndpointURL("https://localhost:8200"),
 	)
 	/* can also use use the http exporter, one use case would be to export to http istead of https (grpc requires https)
-		for this import "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp" 
-		if endpointurl ends with extra path (e.g http://localhost:8200/apmsink), we need to add the WithURLPath to specify the path to send traces
-		```
-		otlptracehttp.WithEndpoint("localhost:8200")
-		otlptracehttp.WithURLPath("/apm-sink/v1/traces")
-		```
-		or can also do
-		```
-		otlptracehttp.WithEndpointURL("http://localhost:8200/apm-sink/v1/traces")
-		```
-	*/ 
+	for this import "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	if endpointurl ends with extra path (e.g http://localhost:8200/apmsink), we need to add the WithURLPath to specify the path to send traces
+	```
+	otlptracehttp.WithEndpoint("localhost:8200")
+	otlptracehttp.WithURLPath("/apm-sink/v1/traces")
+	```
+	or can also do
+	```
+	otlptracehttp.WithEndpointURL("http://localhost:8200/apm-sink/v1/traces")
+	```
+	*/
 	// exporter, err := otlptracehttp.New(
 	// 	context.Background(),
 	// 	otlptracehttp.WithEndpointURL("http://localhost:8200"),
 	// )
-
 
 	if err != nil {
 		return nil, err
@@ -84,7 +82,7 @@ func InitTracer() (*sdktrace.TracerProvider, error) {
 
 func doUnary(c greetpb.GreetServiceClient) {
 	fmt.Println("Starting to do a Unary RPC...")
-	// creating span here is critical to assure that elastic service map will work in the same way it does with 
+	// creating span here is critical to assure that elastic service map will work in the same way it does with
 	tracer := otel.Tracer("")
 	ctx, span := tracer.Start(
 		context.Background(),
@@ -109,7 +107,6 @@ func doUnary(c greetpb.GreetServiceClient) {
 	}
 	log.Printf("Response from Greet: %v", res.Result)
 }
-
 
 func main() {
 	tp, err := InitTracer()
@@ -137,4 +134,3 @@ func main() {
 	doUnary(c)
 
 }
-
