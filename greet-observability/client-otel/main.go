@@ -121,8 +121,8 @@ func main() {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		/*
-		the attribute attribute.Key("http.url") would populate the elastic
-		span attribute span.destination.service.name
+		The attribute `attribute.Key("http.url")`` would populate the elastic
+		span attribute `span.destination.service.name`. it is optional!
 		its kinda weird that we need to put it here given that we start a span with the doUnary function
 		ideally we would put it in the doUnary span, but that didnt seem to have affected anything
 		*/
