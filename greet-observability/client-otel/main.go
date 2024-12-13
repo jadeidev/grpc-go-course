@@ -55,8 +55,8 @@ func InitTracer() (*sdktrace.TracerProvider, error) {
 		resource.WithContainer(),    // Discover and provide container information.
 		resource.WithHost(),         // Discover and provide host information.
 		resource.WithAttributes(
-			attribute.String("service.name", "grpc-greeter-client-otel"), // Add custom resource attributes.
-			attribute.String("deployment.environment", "development"), // this is for elastic ECS
+			attribute.Key("service.name").String("grpc-greeter-client-otel"), // Add custom resource attributes.
+			attribute.Key("deployment.environment").String("development"), // this is specifically for elastic so that env is properly mapped
 		),
 	)
 	if err != nil {
@@ -132,6 +132,7 @@ func main() {
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler(
 			otelgrpc.WithSpanAttributes(
 				attribute.Key("http.url").String("http://127.0.0.1:50051"),
+				attribute.Key("deployment.environment").String("development"), // this is specifically for elastic so that env is properly mapped
 			),
 		)),
 	}
