@@ -27,11 +27,23 @@ func InitTracer() (*sdktrace.TracerProvider, error) {
 		context.Background(),
 		otlptracegrpc.WithEndpointURL("https://localhost:8200"),
 	)
-	// can also use use the http exporter, one use case would be to export to http istead of https (grpc requires https)
-	// for this import "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp" 
+	/* can also use use the http exporter, one use case would be to export to http istead of https (grpc requires https)
+		for this import "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp" 
+		if endpointurl ends with extra path (e.g http://localhost:8200/apmsink), we need to add the WithURLPath to specify the path to send traces
+		```
+		otlptracehttp.WithEndpoint("localhost:8200")
+		otlptracehttp.WithURLPath("/apm-sink/v1/traces")
+		```
+		or can also do
+		```
+		otlptracehttp.WithEndpointURL("http://localhost:8200/apm-sink/v1/traces")
+		```
+	*/ 
 	// exporter, err := otlptracehttp.New(
 	// 	context.Background(),
 	// 	otlptracehttp.WithEndpointURL("http://localhost:8200"),
+	// )
+
 
 	if err != nil {
 		return nil, err

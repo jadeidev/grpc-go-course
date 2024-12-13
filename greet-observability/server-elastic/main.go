@@ -29,8 +29,8 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	tx := apm.TransactionFromContext(ctx)
 	if tx == nil {
 		tx = apm.DefaultTracer().StartTransaction("HTTP GET", "request")
+		defer tx.End() 
 	}
-	defer tx.End()
 
 	span := tx.StartSpan("GET https://jsonplaceholder.typicode.com/posts/1", "external.http", nil)
 	defer span.End()
