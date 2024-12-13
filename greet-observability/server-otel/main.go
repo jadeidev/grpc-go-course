@@ -105,6 +105,7 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 		resource.WithContainer(),    // Discover and provide container information.
 		resource.WithHost(),         // Discover and provide host information.
 		resource.WithAttributes(attribute.String("service.name", "grpc-greeter-server-otel")), // Add custom resource attributes.
+		resource.WithAttributes(attribute.String("deployment.environment", "development")), // this is for elastic
 	)
 	if err != nil {
 		log.Fatalln(err) // The error may be fatal.
