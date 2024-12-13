@@ -120,7 +120,17 @@ func main() {
 	}()
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		/*
+		the attribute attribute.Key("http.url") would populate the elastic
+		span attribute span.destination.service.name
+		its kinda weird that we need to put it here given that we start a span with the doUnary function
+		ideally we would put it in the doUnary span, but that didnt seem to have affected anything
+		*/
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler(
+			otelgrpc.WithSpanAttributes(
+				attribute.Key("http.url").String("http://127.0.0.1:50051"),
+			),
+		)),
 	}
 
 	cc, err := grpc.NewClient("localhost:50051", opts...)
