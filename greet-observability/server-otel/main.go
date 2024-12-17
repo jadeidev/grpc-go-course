@@ -31,7 +31,7 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	fmt.Printf("Greet function was invoked with %v\n", req)
 	// Add span attributes for better visualization (not mandatory)
 	tracer := otel.Tracer("")
-	ctx, span := tracer.Start(
+	ctx, span = tracer.Start(
 		ctx,
 		"greet.v1.GreetService",
 		trace.WithSpanKind(trace.SpanKindServer),
