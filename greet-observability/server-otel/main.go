@@ -27,6 +27,10 @@ type server struct {
 	greetpb.UnimplementedGreetServiceServer
 }
 
+func spanNameFormatter(operation string, r *http.Request) string {
+	return fmt.Sprintf("HTTP %s %s", r.Method, r.URL.Path)
+}
+
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	fmt.Printf("Greet function was invoked with %v\n", req)
 	// Add span attributes for better visualization (not mandatory)
@@ -44,7 +48,7 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	defer span.End()
 	// Create an HTTP client with OpenTelemetry instrumentation to make
 	client := http.Client{
-		Transport: otelhttp.NewTransport(http.DefaultTransport),
+		Transport: otelhttp.NewTransport(http.DefaultTransport, otelhttp.WithSpanNameFormatter(spanNameFormatter)),
 	}
 
 	// Make the HTTP request
