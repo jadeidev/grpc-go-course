@@ -140,6 +140,7 @@ func main() {
 	}
 	tp, err := initTracer()
 	defer func() {
+		// this fucntion should be placed in main, in case of a server you can also not use it at all if main process shutsdown it will shutdown too
 		if err := tp.Shutdown(context.Background()); err != nil {
 			log.Printf("Error shutting down tracer provider: %v", err)
 		}
