@@ -116,7 +116,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// this fucntion is critical here to assure tracer is being sent
+	// this fucntion is critical here to assure tracer is being sent, 
+	// if dont wanna use this to assure that the trace is flushed can use init TraceProvider with sdktrace.WithSyncer(exporter) instead of batcher.
 	defer func() {
 		if err := tp.Shutdown(context.Background()); err != nil {
 			log.Printf("Error shutting down tracer provider: %v", err)
