@@ -56,7 +56,7 @@ func InitTracer() (*sdktrace.TracerProvider, error) {
 		resource.WithHost(),         // Discover and provide host information.
 		resource.WithAttributes(
 			attribute.Key("service.name").String("grpc-greeter-client-otel"), // Add custom resource attributes.
-			attribute.Key("deployment.environment").String("development"), // this is specifically for elastic so that env is properly mapped
+			attribute.Key("deployment.environment").String("development"),    // this is specifically for elastic so that env is properly mapped
 		),
 	)
 	if err != nil {
@@ -116,8 +116,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// this fucntion is critical here to assure tracer is being sent, 
-	// if dont wanna use this to assure that the trace is flushed can use init TraceProvider with sdktrace.WithSyncer(exporter) instead of batcher.
+	// when using batcher as the exporter we need to shutdown the exporter to assure that all traces are sent
+	// this is because the batcher will not send traces until the buffer is full or the exporter is shutdown or batcher timeout is reached
+	// for testing purposes we just do this here. an alternative would be to use Syncer exporter instead of Batcher
 	defer func() {
 		if err := tp.Shutdown(context.Background()); err != nil {
 			log.Printf("Error shutting down tracer provider: %v", err)
@@ -126,10 +127,10 @@ func main() {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		/*
-		The attribute `attribute.Key("http.url")`` would populate the elastic
-		span attribute `span.destination.service.name`. it is optional!
-		its kinda weird that we need to put it here given that we start a span with the doUnary function
-		ideally we would put it in the doUnary span, but that didnt seem to have affected anything
+			The attribute `attribute.Key("http.url")`` would populate the elastic
+			span attribute `span.destination.service.name`. it is optional!
+			its kinda weird that we need to put it here given that we start a span with the doUnary function
+			ideally we would put it in the doUnary span, but that didnt seem to have affected anything
 		*/
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler(
 			otelgrpc.WithSpanAttributes(
